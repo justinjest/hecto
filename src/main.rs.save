@@ -1,0 +1,8 @@
+use std::io::{self, Read};use std::io::{self, Read};
+
+fn main() { for b in io::stdin().bytes() { fn main() { let c=b.unwrap() as char; for b in io::stdin().bytes() { println!("{}", c); let c=b.unwrap() as char; } 
+        println!("{}", c);}
+    }
+}
+^G Help ^O Write Out ^W Where Is ^K Cut ^T Execute ^C Location M-U Undo M-A Set Mark M-] To Bracket M-Q Previous ^X Exit ^R Read File ^\ Replace ^U Paste ^J 
+Justify ^/ Go To Line M-E Redo M-6 Copy ^Q Where Was M-W Nextuse std::io::{self, Read};
