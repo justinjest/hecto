@@ -1,52 +1,30 @@
 use crossterm::event::{read, Event, Event::Key, KeyCode::Char, KeyEvent, KeyModifiers};
-use crossterm::execute;
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType};
-use std::io::stdout;
+
+mod term;
+use term::Term;
 
 pub struct Editor {
     should_quit: bool,
 }
 
 impl Editor {
-    pub fn default() -> Self {
-        Editor { should_quit: false }
+    pub const fn default() -> Self {
+        Self { should_quit: false }
     }
     pub fn run(&mut self) {
-        Self::initialize().unwrap();
+        Term::initialize().unwrap();
         let result = self.repl();
-        Self::terminate().unwrap();
+        Term::terminate().unwrap();
         result.unwrap();
-    }
-
-    fn initialize() -> Result<(), std::io::Error> {
-        enable_raw_mode()?;
-        Self::clear_screen()?;
-        Self::draw_rows()
-    }
-    fn terminate() -> Result<(), std::io::Error> {
-        disable_raw_mode()
-    }
-    fn clear_screen() -> Result<(), std::io::Error> {
-        let mut stdout = stdout();
-        execute!(stdout, Clear(ClearType::All))
-    }
-    fn draw_rows() -> Result<(), std::io::Error> {
-        let (_, row) = crossterm::terminal::size()?;
-        for number in 0..row {
-            crossterm::cursor::MoveTo(0, number);
-            print!("~\r\n");
-        }
-        crossterm::cursor::MoveTo(0,1);
-        Ok(())
     }
     fn repl(&mut self) -> Result<(), std::io::Error> {
         loop {
-            let event = read()?;
-            self.evaluate_event(&event);
             self.refresh_screen()?;
             if self.should_quit {
                 break;
             }
+            let event = read()?;
+            self.evaluate_event(&event);
         }
         Ok(())
     }
@@ -65,9 +43,24 @@ impl Editor {
     }
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
         if self.should_quit {
-            Self::clear_screen()?;
+            Term::clear_screen()?;
             print!("Goodbye.\r\n");
+        } else {
+            Self::draw_rows()?;
+            Term::move_cursor_to(0,0)?;
         }
         Ok(())
     }
+
+    fn draw_rows() -> Result<(), std::io::Error> {
+        let height = Term::size()?.1;
+        for current_row in 0..height {
+            print!("~");
+            if current_row + 1 < height {
+                print!("\r\n");
+            }
+        }
+        Ok(())
+    }
+
 }
