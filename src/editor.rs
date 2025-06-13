@@ -1,7 +1,9 @@
 use crossterm::event::{read, Event, Event::Key, KeyCode::Char, KeyEvent, KeyModifiers};
+use std::io::{Write, stdout, Error};
+
 
 mod term;
-use term::Term;
+use term::{Term, Size, Position};
 
 pub struct Editor {
     should_quit: bool,
@@ -17,7 +19,7 @@ impl Editor {
         Term::terminate().unwrap();
         result.unwrap();
     }
-    fn repl(&mut self) -> Result<(), std::io::Error> {
+    fn repl(&mut self) -> Result<(), Error> {
         loop {
             self.refresh_screen()?;
             if self.should_quit {
@@ -41,24 +43,30 @@ impl Editor {
             }
         }
     }
-    fn refresh_screen(&self) -> Result<(), std::io::Error> {
+    fn refresh_screen(&self) -> Result<(), Error> {
+        Term::hide_cursor()?;
+        stdout().flush()?;
         if self.should_quit {
-            Term::clear_screen()?;
-            print!("Goodbye.\r\n");
+            Term::update_screen()?;
+            Term::print("Goodbye!\r\n")?;
         } else {
             Self::draw_rows()?;
-            Term::move_cursor_to(0,0)?;
+            Term::move_cursor_to(Position{x:0,y:0})?;
         }
+        Term::show_cursor()?;
+        Term::execute()?;
         Ok(())
     }
 
-    fn draw_rows() -> Result<(), std::io::Error> {
-        let height = Term::size()?.1;
+    fn draw_rows() -> Result<(), Error> {
+        let Size{height, ..} = Term::size()?;
         for current_row in 0..height {
-            print!("~");
+            Term::clear_line()?;
+            Term::print("~")?;
             if current_row + 1 < height {
-                print!("\r\n");
+                Term::print("\r\n")?;
             }
+            stdout().flush()?;
         }
         Ok(())
     }
