@@ -68,7 +68,19 @@ impl Editor {
             }
             stdout().flush()?;
         }
+        Self::draw_welcome()?;
         Ok(())
     }
+
+    fn draw_welcome() -> Result<(), Error> {
+        let Size{width, height} = Term::size()?;
+        let third_height = height / 3;
+        let msg = "hecto 0.1.0\r\n";
+        let center = width - (msg.len() as u16);
+        let half_width = center / 2;
+        Term::move_cursor_to(Position{x:half_width, y:third_height})?;
+        Term::print(msg)?;
+        Ok(())
+        }
 
 }
