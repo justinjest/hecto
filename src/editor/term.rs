@@ -19,7 +19,14 @@ pub struct Position {
     pub x: usize,
     pub y: usize,
 }
-
+/// Represents the Terminal.
+/// Edge Case for platforms where `usize` < `u16`:
+/// Regardless of the actual size of the Terminal, this representation
+/// only spans over at most `usize::MAX` or `u16::size` rows/columns,
+/// whichever is smaller.
+/// Each size returned truncates to min(`usize::MAX`, `u16::MAX`)
+/// And should you attempt to set the cursor out of these bounds,
+/// it will also be truncated.
 pub struct Term;
 
 impl Term {
@@ -47,7 +54,12 @@ impl Term {
         Self::queue_command( Clear(ClearType::FromCursorDown))?;
         Ok(())
     }
+    //// Moves the cursor to the given position
+    //// # Arguments
+    //// * `Position` - the `Position` to move a cursor to. Will be truncated
+    //// to `u16::MAX` if bigger.
     pub fn move_cursor_to(position: Position) ->  Result<(), Error> {
+        // clippy::as_conversions: See doc above.
         #[allow(clippy::as_conversions, clippy::cast_possible_truncation)]
         Self::queue_command( MoveTo(position.x as u16, position.y as u16))?;
         Ok(())
@@ -64,11 +76,17 @@ impl Term {
         Self::queue_command( Print(string))?;
         Ok(())
     }
+    //// Returns the size of the this terminal.
+    //// Edge case for systems with `usize` < `u16`:
+    //// * A `Size` representing the terminal size. Any coordinate `z`
+    //// truncated to `usize` if `usize` < `z` < `u16`
     pub fn size() -> Result<Size, Error> {
         let (width_u16, height_u16) = size()?;
+        // clippy::as_conversions see doc above
         #[allow(clippy::as_conversions)]
         let width = width_u16 as usize;
-        #[allow(clippy::as_conversions)]
+         // clippy::as_conversions see doc above
+         #[allow(clippy::as_conversions)]
         let height = height_u16 as usize;
         Ok(Size {height, width})
     }

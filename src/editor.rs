@@ -1,6 +1,6 @@
-use crossterm::event::{read, Event, Event::Key, KeyCode::Char, KeyEvent, KeyModifiers};
+use crossterm::event::{read, Event, Event::Key, KeyCode, KeyCode::Char, KeyEvent, KeyModifiers};
 use std::io::{Write, stdout, Error};
-
+use std::cmp::{max, min};
 
 mod term;
 use term::{Term, Size, Position};
@@ -17,24 +17,29 @@ impl Editor {
     pub const fn default() -> Self {
         Self { should_quit: false }
     }
+
     pub fn run(&mut self) {
         Term::initialize().unwrap();
         let result = self.repl();
         Term::terminate().unwrap();
         result.unwrap();
     }
+
     fn repl(&mut self) -> Result<(), Error> {
+        let mut caret_pos = Position{x: 0, y: 0};
         loop {
-            self.refresh_screen()?;
+            self.refresh_screen(&caret_pos)?;
             if self.should_quit {
                 break;
             }
             let event = read()?;
-            self.evaluate_event(&event);
+            caret_pos = self.evaluate_event(&event, caret_pos)?;
         }
         Ok(())
     }
-    fn evaluate_event(&mut self, event: &Event) {
+
+    fn evaluate_event(&mut self, event: &Event, mut pos: Position) -> Result<Position, Error> {
+        let Size{height, width} = Term::size()?;
         if let Key(KeyEvent {
             code, modifiers, ..
         }) = event
@@ -43,19 +48,26 @@ impl Editor {
                 Char('q') if *modifiers == KeyModifiers::CONTROL => {
                     self.should_quit = true;
                 }
+                KeyCode::Right => {pos = Position{x: min(pos.x.saturating_add(1), width-1), y: pos.y}}
+                KeyCode::Left => {pos = Position{x: max(pos.x.saturating_sub(1), 0), y: pos.y}}
+                KeyCode::Up => {pos = Position{x: pos.x, y: min(pos.y.saturating_sub(1), height-2)}}
+                KeyCode::Down => {pos = Position{x: pos.x, y: max(pos.y.saturating_add(1), 0)}}
                 _ => (),
             }
         }
+        Ok(pos)
     }
-    fn refresh_screen(&self) -> Result<(), Error> {
+// (Max (Min current pos || screen size) 0)
+    fn refresh_screen(&self, pos:&Position) -> Result<(), Error> {
         Term::hide_cursor()?;
+        Term::move_cursor_to(Position{x:0, y:0})?;
         stdout().flush()?;
         if self.should_quit {
             Term::update_screen()?;
             Term::print("Goodbye!\r\n")?;
         } else {
             Self::draw_rows()?;
-            Term::move_cursor_to(Position{x:0,y:0})?;
+            Term::move_cursor_to(*pos)?;
         }
         Term::show_cursor()?;
         Term::execute()?;
@@ -66,6 +78,9 @@ impl Editor {
         let Size{height, ..} = Term::size()?;
         for current_row in 0..height {
             Term::clear_line()?;
+            // We don't need to put this exactly in the middle, it can be a
+            // bit to the left or right
+            #[allow(clippy::integer_division)]
             if current_row == height/3 {
             Self::draw_welcome_message()?;
             } else {
@@ -82,6 +97,8 @@ impl Editor {
         let mut msg = format!("{NAME} editor -- version {VERSION}");
         let width = Term::size()?.width;
         let len = msg.len();
+        // We don't need to put this exactly in the middle, it can be a
+        // bit to the left or right
         #[allow(clippy::integer_division)]
         let padding = (width.saturating_sub(len)) / 2;
         let spaces = " ".repeat(padding.saturating_sub(1));
@@ -90,6 +107,7 @@ impl Editor {
         Term::print(msg)?;
         Ok(())
         }
+
     fn draw_empty_row() -> Result<(), Error> {
         Term::print("~")?;
         Ok(())
