@@ -71,7 +71,7 @@ impl Editor {
             } else {
                 Self::draw_empty_row()?;
             }
-            if current_row + 1 < height {
+            if current_row.saturating_add(1) < height {
                 Term::print("\r\n")?;
             }
         }
@@ -80,10 +80,11 @@ impl Editor {
 
     fn draw_welcome_message() -> Result<(), Error> {
         let mut msg = format!("{NAME} editor -- version {VERSION}");
-        let width = Term::size()?.width as usize;
+        let width = Term::size()?.width;
         let len = msg.len();
-        let padding = (width - len) / 2;
-        let spaces = " ".repeat(padding - 1);
+        #[allow(clippy::integer_division)]
+        let padding = (width.saturating_sub(len)) / 2;
+        let spaces = " ".repeat(padding.saturating_sub(1));
         msg = format!("~{spaces}{msg}");
         msg.truncate(width);
         Term::print(msg)?;
