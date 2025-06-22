@@ -19,7 +19,9 @@ impl View {
             // We don't need to put this exactly in the middle, it can be a
             // bit to the left or right
             #[allow(clippy::integer_division)]
-            if current_row == height/3 {
+            if current_row == 0 {
+                self::Term::print("~ Hello, world!")?;
+            } else if current_row == height/3 {
             Self::draw_welcome_message()?;
             } else {
                 Self::draw_empty_row()?;
