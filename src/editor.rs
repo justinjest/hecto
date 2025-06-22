@@ -52,6 +52,10 @@ impl Editor {
                 KeyCode::Left => {pos = Position{x: max(pos.x.saturating_sub(1), 0), y: pos.y}}
                 KeyCode::Up => {pos = Position{x: pos.x, y: min(pos.y.saturating_sub(1), height-2)}}
                 KeyCode::Down => {pos = Position{x: pos.x, y: max(pos.y.saturating_add(1), 0)}}
+                KeyCode::Home => {pos = Position{x: 0, y: pos.y}}
+                KeyCode::End => {pos = Position{x: width, y: pos.y}}
+                KeyCode::PageUp => {pos = Position{x: pos.x, y: 0}}
+                KeyCode::PageDown => {pos = Position{x: pos.x, y: height}}
                 _ => (),
             }
         }
