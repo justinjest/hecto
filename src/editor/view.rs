@@ -44,7 +44,7 @@ impl View {
         let spaces = " ".repeat(padding.saturating_sub(1));
         msg = format!("~{spaces}{msg}");
         msg.truncate(width);
-        Term::print(msg)?;
+        Term::print(&msg)?;
         Ok(())
         }
 

@@ -1,5 +1,5 @@
 use crossterm::event::{read, Event, Event::Key, KeyCode, KeyCode::Char, KeyEvent, KeyModifiers};
-use std::io::{Write, stdout, Error};
+use std::io::Error;
 use std::cmp::{max, min};
 
 mod term;
@@ -62,7 +62,6 @@ impl Editor {
     fn refresh_screen(&self, pos:&Position) -> Result<(), Error> {
         Term::hide_cursor()?;
         Term::move_cursor_to(Position{x:0, y:0})?;
-        stdout().flush()?;
         if self.should_quit {
             Term::update_screen()?;
             Term::print("Goodbye!\r\n")?;
