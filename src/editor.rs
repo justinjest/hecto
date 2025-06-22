@@ -43,8 +43,7 @@ impl Editor {
             match code {
                 Char('q') if *modifiers == KeyModifiers::CONTROL => {
                     self.should_quit = true;
-<<<<<<< HEAD
-                }
+               }
                 KeyCode::Right => {pos = Position{x: min(pos.x.saturating_add(1), width-1), y: pos.y}}
                 KeyCode::Left => {pos = Position{x: max(pos.x.saturating_sub(1), 0), y: pos.y}}
                 KeyCode::Up => {pos = Position{x: pos.x, y: min(pos.y.saturating_sub(1), height-2)}}
@@ -53,27 +52,13 @@ impl Editor {
                 KeyCode::End => {pos = Position{x: width, y: pos.y}}
                 KeyCode::PageUp => {pos = Position{x: pos.x, y: 0}}
                 KeyCode::PageDown => {pos = Position{x: pos.x, y: height}}
-=======
-                },
-                KeyCode::Right => {pos = Position{x: min(pos.x.saturating_add(1), width-1), y: pos.y}},
-                KeyCode::Left => {pos = Position{x: max(pos.x.saturating_sub(1), 0), y: pos.y}},
-                KeyCode::Up => {pos = Position{x: pos.x, y: min(pos.y.saturating_sub(1), height-2)}},
-                KeyCode::Down => {pos = Position{x: pos.x, y: max(pos.y.saturating_add(1), 0)}},
-                KeyCode::PageUp => {pos = Position{x: pos.x, y: 0}},
-                KeyCode::PageDown => {pos = Position{x: pos.x, y: height-1}},
-                KeyCode::Home => {pos = Position{x: 0, y: pos.y}},
-                KeyCode::End => {pos = Position{x: width-1, y: pos.y}},
->>>>>>> e399967225db9d48b57b8fb1f028df5ace66963c
                 _ => (),
             }
         }
         Ok(pos)
     }
-<<<<<<< HEAD
 
     // (Max (Min current pos || screen size) 0)
-=======
->>>>>>> e399967225db9d48b57b8fb1f028df5ace66963c
     fn refresh_screen(&self, pos:&Position) -> Result<(), Error> {
         Term::hide_cursor()?;
         Term::move_cursor_to(Position{x:0, y:0})?;
