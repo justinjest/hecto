@@ -1,26 +1,37 @@
 use std::io::Error;
-
 use crate::editor::term::{Term, Size};
 
 const NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-pub struct View;
+#[derive(Default)]
+pub struct Buffer {
+    pub buf: Vec<String>,
+}
+
+#[derive(Default)]
+pub struct View {
+    pub buffer: Buffer,
+}
+
 impl View {
-    pub fn render() -> Result<(), Error> {
-        Self::draw_rows()?;
+
+    pub fn render(&self) -> Result<(), Error> {
+        Self::draw_rows(&self)?;
         Ok(())
     }
 
-    fn draw_rows() -> Result<(), Error> {
+    fn draw_rows(&self) -> Result<(), Error> {
         let Size{height, ..} = Term::size()?;
         for current_row in 0..height {
             Term::clear_line()?;
             // We don't need to put this exactly in the middle, it can be a
             // bit to the left or right
             #[allow(clippy::integer_division)]
-            if current_row == 0 {
-                self::Term::print("~ Hello, world!")?;
+            if let Some(element) = self.buffer.buf.get(current_row) {
+                let elm = element;
+                let msg = format!("~ {elm}");
+                Term::print(&msg)?;
             } else if current_row == height/3 {
             Self::draw_welcome_message()?;
             } else {
@@ -32,6 +43,7 @@ impl View {
         }
         Ok(())
     }
+
 
     fn draw_welcome_message() -> Result<(), Error> {
         let mut msg = format!("{NAME} editor -- version {VERSION}");

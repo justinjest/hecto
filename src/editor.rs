@@ -10,6 +10,7 @@ use view::View;
 #[derive(Default)]
 pub struct Editor {
     should_quit: bool,
+    view: View,
 }
 
 impl Editor {
@@ -59,14 +60,14 @@ impl Editor {
     }
 
     // (Max (Min current pos || screen size) 0)
-    fn refresh_screen(&self, pos:&Position) -> Result<(), Error> {
+    fn refresh_screen(&mut self, pos:&Position) -> Result<(), Error> {
         Term::hide_cursor()?;
         Term::move_cursor_to(Position{x:0, y:0})?;
         if self.should_quit {
             Term::update_screen()?;
             Term::print("Goodbye!\r\n")?;
         } else {
-            View::render()?;
+            View::render(&self.view)?;
             Term::move_cursor_to(*pos)?;
         }
         Term::show_cursor()?;
