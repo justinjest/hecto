@@ -15,6 +15,12 @@ pub struct Editor {
 
 impl Editor {
 
+    pub fn load(&mut self, file_contents: String) {
+       for i in file_contents.lines() {
+           self.view.buffer.buf.push(i.to_string());
+       }
+    }
+
     pub fn run(&mut self) {
         Term::initialize().unwrap();
         let result = self.repl();

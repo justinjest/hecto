@@ -15,11 +15,35 @@ pub struct View {
 impl View {
 
     pub fn render(&self) -> Result<(), Error> {
-        Self::draw_rows(&self)?;
+        if self.buffer.buf.is_empty() == true {
+            Self::draw_welcome_rows(&self)?;
+        } else {
+            Self::draw_buffer_rows(&self)?;
+        }
         Ok(())
     }
 
-    fn draw_rows(&self) -> Result<(), Error> {
+    fn draw_welcome_rows(&self) -> Result<(), Error> {
+        let Size{height, ..} = Term::size()?;
+        for current_row in 0..height {
+            Term::clear_line()?;
+            // We don't need to put this exactly in the middle, it can be a
+            // bit to the left or right
+            #[allow(clippy::integer_division)]
+            if current_row == height/3 {
+                Self::draw_welcome_message()?;
+            } else {
+                Self::draw_empty_row()?;
+            }
+            if current_row.saturating_add(1) < height {
+                Term::print("\r\n")?;
+            }
+        }
+        Ok(())
+    }
+
+
+    fn draw_buffer_rows(&self) -> Result<(), Error> {
         let Size{height, ..} = Term::size()?;
         for current_row in 0..height {
             Term::clear_line()?;
@@ -30,9 +54,7 @@ impl View {
                 let elm = element;
                 let msg = format!("{elm}");
                 Term::print(&msg)?;
-            } else if current_row == height/3 {
-            Self::draw_welcome_message()?;
-            } else {
+            }  else {
                 Self::draw_empty_row()?;
             }
             if current_row.saturating_add(1) < height {
