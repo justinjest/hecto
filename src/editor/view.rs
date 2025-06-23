@@ -4,10 +4,8 @@ use crate::editor::term::{Term, Size};
 const NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-#[derive(Default)]
-pub struct Buffer {
-    pub buf: Vec<String>,
-}
+mod buffer;
+use buffer::Buffer;
 
 #[derive(Default)]
 pub struct View {
@@ -30,7 +28,7 @@ impl View {
             #[allow(clippy::integer_division)]
             if let Some(element) = self.buffer.buf.get(current_row) {
                 let elm = element;
-                let msg = format!("~ {elm}");
+                let msg = format!("{elm}");
                 Term::print(&msg)?;
             } else if current_row == height/3 {
             Self::draw_welcome_message()?;
