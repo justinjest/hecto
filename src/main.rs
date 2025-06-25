@@ -10,7 +10,7 @@ fn main() -> Result<(), Error> {
     let mut editor = Editor::default();
     let args: Vec<String> = std::env::args().collect();
     if let Some(first_arg) = args.get(1) {
-        let file_contents = std::fs::read_to_string(first_arg)?;
+        let file_contents = fs::read_to_string(first_arg)?;
         editor.load(file_contents);
         // Some function that we have an arg
     }

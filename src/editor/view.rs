@@ -15,7 +15,7 @@ pub struct View {
 impl View {
 
     pub fn render(&self) -> Result<(), Error> {
-        if self.buffer.buf.is_empty() == true {
+        if self.buffer.is_empty() == true {
             Self::draw_welcome_rows(&self)?;
         } else {
             Self::draw_buffer_rows(&self)?;
