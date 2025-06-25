@@ -40,14 +40,15 @@ impl View {
 
 
     fn draw_buffer_rows(&self) -> Result<(), Error> {
-        let Size{height, ..} = Term::size()?;
+        let Size{height, width} = Term::size()?;
         for current_row in 0..height {
             // We don't need to put this exactly in the middle, it can be a
             // bit to the left or right
             #[allow(clippy::integer_division)]
             if let Some(element) = self.buffer.buf.get(current_row) {
                 let elm = element;
-                let msg = format!("{elm}");
+                let mut msg = format!("{elm}");
+                msg.truncate(width);
                 self.draw_row(current_row, &msg)?;
             }  else {
                 self.draw_row(current_row, "~")?;
