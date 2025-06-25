@@ -45,10 +45,12 @@ impl Term {
         Self::queue_command( Clear(ClearType::All))?;
         Ok(())
     }
+    /* This was used earlier, but is currently dead code
     pub fn clear_line() -> Result<(), Error> {
         Self::queue_command( Clear(ClearType::CurrentLine))?;
         Ok(())
     }
+    */
     pub fn update_screen() -> Result<(), Error> {
         Self::queue_command( Clear(ClearType::FromCursorDown))?;
         Ok(())

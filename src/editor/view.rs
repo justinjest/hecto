@@ -3,10 +3,10 @@ use crate::editor::term::{Term, Size};
 
 const NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-
 mod buffer;
 use buffer::Buffer;
 
+use crate::editor::Position;
 #[derive(Default)]
 pub struct View {
     pub buffer: Buffer,
@@ -26,17 +26,13 @@ impl View {
     fn draw_welcome_rows(&self) -> Result<(), Error> {
         let Size{height, ..} = Term::size()?;
         for current_row in 0..height {
-            Term::clear_line()?;
             // We don't need to put this exactly in the middle, it can be a
             // bit to the left or right
             #[allow(clippy::integer_division)]
             if current_row == height/3 {
-                Self::draw_welcome_message()?;
+                self.draw_row(current_row, &Self::create_welcome_message()?)?;
             } else {
-                Self::draw_empty_row()?;
-            }
-            if current_row.saturating_add(1) < height {
-                Term::print("\r\n")?;
+                self.draw_row(current_row, "~")?;
             }
         }
         Ok(())
@@ -46,26 +42,22 @@ impl View {
     fn draw_buffer_rows(&self) -> Result<(), Error> {
         let Size{height, ..} = Term::size()?;
         for current_row in 0..height {
-            Term::clear_line()?;
             // We don't need to put this exactly in the middle, it can be a
             // bit to the left or right
             #[allow(clippy::integer_division)]
             if let Some(element) = self.buffer.buf.get(current_row) {
                 let elm = element;
                 let msg = format!("{elm}");
-                Term::print(&msg)?;
+                self.draw_row(current_row, &msg)?;
             }  else {
-                Self::draw_empty_row()?;
-            }
-            if current_row.saturating_add(1) < height {
-                Term::print("\r\n")?;
+                self.draw_row(current_row, "~")?;
             }
         }
         Ok(())
     }
 
 
-    fn draw_welcome_message() -> Result<(), Error> {
+    fn create_welcome_message() -> Result<String, Error> {
         let mut msg = format!("{NAME} editor -- version {VERSION}");
         let width = Term::size()?.width;
         let len = msg.len();
@@ -76,13 +68,12 @@ impl View {
         let spaces = " ".repeat(padding.saturating_sub(1));
         msg = format!("~{spaces}{msg}");
         msg.truncate(width);
-        Term::print(&msg)?;
-        Ok(())
+        Ok(msg)
         }
 
-    fn draw_empty_row() -> Result<(), Error> {
-        Term::print("~")?;
+    fn draw_row(&self, line: usize, msg: &str) -> Result<(), Error> {
+        Term::move_cursor_to(Position {x: 0, y: line})?;
+        Term::print(msg)?;
         Ok(())
     }
-
 }
