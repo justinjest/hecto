@@ -15,17 +15,13 @@ pub struct Editor {
 
 impl Editor {
 
-    pub fn load(&mut self, file_contents: String) {
-       for i in file_contents.lines() {
-           self.view.buffer.buf.push(i.to_string());
-       }
-    }
-
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> Result<(), Error> {
+        self.view.buffer.load()?;
         Term::initialize().unwrap();
         let result = self.repl();
         Term::terminate().unwrap();
         result.unwrap();
+        Ok(())
     }
 
     fn repl(&mut self) -> Result<(), Error> {

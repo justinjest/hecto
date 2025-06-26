@@ -7,9 +7,19 @@ mod buffer;
 use buffer::Buffer;
 
 use crate::editor::Position;
-#[derive(Default)]
+
 pub struct View {
     pub buffer: Buffer,
+    pub needs_redraw: bool
+}
+
+impl Default for View {
+    fn default() -> Self {
+        View {
+            buffer: Buffer {buf: Vec::new()},
+            needs_redraw: true,
+        }
+    }
 }
 
 impl View {
